@@ -20,6 +20,7 @@
   "description": "",
   "dependencies": {
     "express": "^5.1.0",
+    "express-handlebars": "^8.0.2",
     "handlebars": "^4.7.8"
   }
 }

@@ -4,16 +4,16 @@
 
 var path = require('path');
 const fs = require('fs');
-const db = require('./connect.js');
+//const db = require('./connect.js');
 let http = require('http');
 var express = require('express');
-const session = require('express-session');
 // add express-handlebars to use handlebars with express view engine
 var exphbs = require('express-handlebars');
 const { setTimeout } = require('timers');
+const apiHelper = require('./api.js');
 
 var app = express()
-var port = process.env.PORT || 3001
+var port = process.env.PORT || 3003
 
 //
 // middleware
@@ -38,18 +38,6 @@ hbs.handlebars.registerHelper('ifDefined', function(conditional, options) {
 });
 
 app.use(express.static('static'))
-app.use(session({
-	secret: 'secret',
-	resave: true,
-	saveUninitialized: true,
-    cookie: { }
-}));
-app.use(function (req, res, next) {
-    res.locals.session = req.session;
-    //user = req.session.user;
-    console.info("Middleware session: "+req.session.username)
-    next();
-});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -61,50 +49,28 @@ app.use(express.urlencoded({ extended: true }));
 // NOTE: this route uses ASYNC syntax to allow it to wait
 app.get('/', async (req, res) => {
     // debug 
-    try {
-        const [dbDebug] = await db.query("SHOW TABLES;");
-        console.info(dbDebug);
-    }
-    catch (err) {
-        console.error("Database connection failed");
-    }
-
-	if (req.session.loggedin) {
-		// Output username
-		console.info('Welcome back, ' + req.session.username + '!');
-	} else {
-		// Not logged in
-		console.info('Please login to view this page!');
-        //response.end();
-	}
     const sessInfo = req.session
     res.render('index', {
         sessInfo
     })
 })
-app.get('/login', function (req, res) {
+app.get('/submit', function (req, res) {
     // renders the index page with all posts, and thus all features
-    console.log("SERVING LOGIN VIEW")
-    res.render('login', {
+    res.render('submit', {
 
     })
+})
+app.post('/submit', function (req, res) {
+    // renders the index page with all posts, and thus all features
+    let submissionImage = req.body.submitImage;
+    let submissionTitle = req.body.submitName;
+    let val = apiHelper.saveImageToPath(submissionTitle, submissionImage);
+
+    res.send(val);
 })
 
 // services
 // DATABASE RESET ROUTE
-app.post('/reset-database', async function (req, res) {
-    try {
-        const resetQuery = `EXEC sp_create_lserveDB();`;
-        const [queryResult] = await db.query(resetQuery);
-        console.info('RESET the database \"lserve\"...');
-
-        res.redirect('/');
-    } catch (err) {
-        console.error('Outer reset failure:', err.message);
-        res.status(500).send('Database reset failed.');
-    }
-});
-//auth:login
 app.post('/auth', async (request, response) => {
     console.log("Authorizing...")
 	// Capture the input fields
@@ -142,16 +108,6 @@ app.post('/auth', async (request, response) => {
 		response.end();
 	}
 });
-app.get('/logout', async (req, res, next) => {
-    console.log("Attempting to log out user...")
-    req.session.destroy((err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.redirect('/login');
-    }
-  });
-})
 
 //
 app.listen(port, function () {

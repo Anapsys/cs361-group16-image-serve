@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/style.css">
+
+    <!--
+      Note that the '/' character at the beginning of the URL in the <script>
+      element here is purposeful.  It's setting your page up to be served.
+      See the comment on the <link> element above for more info.
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.runtime.js"></script>
+    <script src="/templatesCompiled.js"></script>
+    <script src="/index.js" charset="utf-8" defer></script>
+
+    <!-- FONTAWESOME - why doesnt this work??? -->
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+  </head>
+  <body>
+
+    {{{body}}}
+
+  </body>
+</html>
