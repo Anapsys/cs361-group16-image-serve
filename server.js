@@ -12,17 +12,29 @@ var exphbs = require('express-handlebars');
 const { setTimeout } = require('timers');
 const apiHelper = require('./api.js');
 const multer = require('multer');
-var storage = multer.diskStorage(
-    {
-        destination: './images/',
-        filename: function ( req, file, cb ) {
-            //req.body is empty...
-            //How could I get the new_file_name property sent from client here?
-            //cb( null, file.originalname+ '-' + Date.now()+".pdf");
-            cb( null, file.originalname);
-        }
+var storage = multer.diskStorage({
+    // INTERESTING: these are all MIDDLEWARE definitions.
+    // when destination was set to an explicit string ("./images"),
+    // the req property was lost. 
+    // changing it to a callback function restored access to req body.
+    destination: function (req, file, cb) {
+        cb(null, './images/');
+    },
+    filename: function ( req, file, cb ) {
+        //req.body is empty...
+        //How could I get the new_file_name property sent from client here?
+        //cb( null, file.originalname+ '-' + Date.now()+".pdf");
+        console.info(req.body.submitName)
+        var newName = req.body.submitName;
+        var oldName = file.originalname;
+        var oldFN = oldName.match(/^[^.]*/);
+        var oldExt = oldName.replace(oldFN, '');
+        var newFN = newName + oldExt;
+        console.log("Old ext: "+oldExt)
+        console.log("Req fn: " + newFN)
+        cb( null, newFN);
     }
-);
+});
 const upload = multer({ storage: storage });
 
 var app = express()
@@ -60,12 +72,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // index
 // NOTE: this route uses ASYNC syntax to allow it to wait
-app.get('/', async (req, res) => {
+app.get('/image/:fn', async (req, res) => {
     // debug 
+    const filename = [req.params.fn]
     const sessInfo = req.session
-    res.render('index', {
-        sessInfo
-    })
+    res.sendFile(__dirname + '/images/'+filename);
 })
 app.get('/submit', function (req, res) {
     // renders the index page with all posts, and thus all features
@@ -76,9 +87,11 @@ app.get('/submit', function (req, res) {
 app.post('/submit', upload.single('submitImage'), function (req, res) {
     // renders the index page with all posts, and thus all features
     let submissionImage = req.file;
+    let submissionReq = req.body;
     //let submissionTitle = req.body.submitName;
     console.log("FOR "+"submissionTitle");
     console.info(submissionImage)
+    console.info(submissionReq)
     res.send('Submitted: '+submissionImage);
 })
 
