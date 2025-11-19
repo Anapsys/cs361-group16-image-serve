@@ -76,6 +76,7 @@ app.get('/image/:fn', async (req, res) => {
     // debug 
     const filename = [req.params.fn]
     const sessInfo = req.session
+    console.log("Serving request for "+filename)
     res.sendFile(__dirname + '/images/'+filename);
 })
 app.get('/submit', function (req, res) {
