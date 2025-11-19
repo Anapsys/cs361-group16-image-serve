@@ -45,10 +45,7 @@ To access the uploaded file, simply call its image/filename route.
 
 ### Debug/direct access routes
 GET Requests:
-- `/`: No request body, session information (cookies) are read out to the console.
-- `/login`: Displays a test page with a login form that will call /auth when submitted.
-- `/logout`: No request body, session information (cookies) are modified.
-- `/reset-database`: Resets the database using the defined stored procedure.
+- `/submit`: Displays a test page with a submission form that will call POST /submit.
 
 ### UML Sequence Diagram
 
