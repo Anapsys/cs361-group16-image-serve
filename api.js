@@ -1,5 +1,6 @@
 var path = require('path');
 const fs = require('fs');
+const multer = require('multer')
 
 const filesDirectory = './images/'
 
@@ -20,7 +21,7 @@ function saveImageToPath(f, fn) {
     }
 
     try {
-        fs.writeFile(fn, f, 'utf8', (err) => {
+        fs.writeFile(fn, f, (err) => {
             //writeFile callback;
             console.info("Write file: "+err)
         })

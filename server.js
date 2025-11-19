@@ -11,6 +11,19 @@ var express = require('express');
 var exphbs = require('express-handlebars');
 const { setTimeout } = require('timers');
 const apiHelper = require('./api.js');
+const multer = require('multer');
+var storage = multer.diskStorage(
+    {
+        destination: './images/',
+        filename: function ( req, file, cb ) {
+            //req.body is empty...
+            //How could I get the new_file_name property sent from client here?
+            //cb( null, file.originalname+ '-' + Date.now()+".pdf");
+            cb( null, file.originalname);
+        }
+    }
+);
+const upload = multer({ storage: storage });
 
 var app = express()
 var port = process.env.PORT || 3003
@@ -60,13 +73,13 @@ app.get('/submit', function (req, res) {
 
     })
 })
-app.post('/submit', function (req, res) {
+app.post('/submit', upload.single('submitImage'), function (req, res) {
     // renders the index page with all posts, and thus all features
-    let submissionImage = req.body.submitImage;
-    let submissionTitle = req.body.submitName;
-    let val = apiHelper.saveImageToPath(submissionTitle, submissionImage);
-
-    res.send(val);
+    let submissionImage = req.file;
+    //let submissionTitle = req.body.submitName;
+    console.log("FOR "+"submissionTitle");
+    console.info(submissionImage)
+    res.send('Submitted: '+submissionImage);
 })
 
 // services
