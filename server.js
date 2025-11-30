@@ -66,6 +66,11 @@ app.use(express.static('static'))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+function getCurrentTime() {
+    let now = new Date();
+    return (`${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`)
+}
+
 //
 // route service
 //
@@ -76,7 +81,7 @@ app.get('/image/:fn', async (req, res) => {
     // debug 
     const filename = [req.params.fn]
     const sessInfo = req.session
-    console.log("Serving request for "+filename)
+    console.log(getCurrentTime()+" Serving request for "+filename)
     res.sendFile(__dirname + '/images/'+filename);
 })
 app.get('/submit', function (req, res) {
@@ -98,45 +103,8 @@ app.post('/submit', upload.single('submitImage'), function (req, res) {
 
 // services
 // DATABASE RESET ROUTE
-app.post('/auth', async (request, response) => {
-    console.log("Authorizing...")
-	// Capture the input fields
-	let username = request.body.username;
-	let password = request.body.password;
-    console.log("Attempting login "+username+" "+password);
-	// Ensure the input fields exists and are not empty
-	if (username && password) {
-		// Execute SQL query that'll select the account from the database based on the specified username and password
-		const [loginResult] = await db.query('CALL lserve.sp_access_user(?, ?);', 
-                                            [username, password]);
-        const [resultUser] = loginResult[0];
-        // If there is an issue with the query, output the error
-        if (typeof resultUser === 'undefined') {
-            const resJSON = {"userInfo": 'undefined', 
-                            "userID": -1,
-                            "message": "Login failure!"}
-            response.send(resJSON);
-        } 
-        else {
-            (console.info(resultUser));
-            // Authenticate the user
-            const resJSON = {"userInfo": resultUser, 
-                            "userID": resultUser.userID,
-                            "message": "Login success!"}
-            response.send(resJSON);
-        }		
-        response.end();
-	} 
-    else {
-        const resJSON = {"userInfo": 'undefined', 
-                        "userID": -1,
-                        "message": "Please enter a username and password!"}
-        response.send(resJSON);
-		response.end();
-	}
-});
 
 //
 app.listen(port, function () {
-    console.log("== Server is listening on port", port)
+    console.log(getCurrentTime()+" == Server is listening on port", port)
 })
